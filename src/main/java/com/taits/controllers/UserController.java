@@ -19,11 +19,11 @@ import java.util.Optional;
 @RequestMapping("/api/users")
 public class UserController {
 
-    @Autowired
-    private UserRepository userRepository;
+        @Autowired
+        private UserRepository userRepository;
 
-    @Autowired
-    private RecordRepository recordRepository;
+        @Autowired
+        private RecordRepository recordRepository;
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<User> getAllUsers(String firstName, String lastName) {
@@ -84,6 +84,20 @@ public class UserController {
     @RequestMapping(value = "/{userId}/records", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Record> getRecordsByOwner(@PathVariable("userId") Integer userId) {
         return recordRepository.findByOwner(userId);
+    }
+
+    @RequestMapping(value = "/{userId}/records", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<Record> createRecord(@PathVariable("userId") Integer userId, Record record) {
+        if (userRepository.findById(userId).isPresent()) {
+            record.setOwner(userId);
+            recordRepository.save(record);
+            URI locationUri = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .path("/api/records/{recordId}")
+                    .buildAndExpand(record.getId())
+                    .toUri();
+            return ResponseEntity.created(locationUri).body(record);
+        } else return ResponseEntity.badRequest().body(null);
     }
 
 }

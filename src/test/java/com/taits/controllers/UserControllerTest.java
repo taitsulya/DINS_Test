@@ -25,6 +25,7 @@ import java.util.Optional;
 import static java.util.Objects.requireNonNull;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -144,7 +145,7 @@ class UserControllerTest {
         Integer testId = 1;
 
         when(userRepository.findById(testId)).thenReturn(Optional.of(user));
-        when(userRepository.save(user)).thenReturn(user);
+        when(userRepository.save(any(User.class))).thenAnswer(i->i.getArgument(0));
 
         User result = userController.updateUserById(testId, update);
 
@@ -175,5 +176,29 @@ class UserControllerTest {
         assertThat(result2.size(), equalTo(0));
 
         assertThat(result1.get(0), equalTo(record1));
+    }
+
+    @Test
+    void createRecord() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+        User user = new User(1, "Alex", "Gussin", "222222");
+        Record record = new Record(2, "Lokesh", "Gupta", "333333", null);
+
+        Integer testId1 = 1;
+        Integer testId2 = 2;
+
+        when(userRepository.findById(testId1)).thenReturn(Optional.of(user));
+        when(userRepository.findById(testId2)).thenReturn(Optional.empty());
+
+        ResponseEntity<Record> responseEntity1 = userController.createRecord(1, record);
+        ResponseEntity<Record> responseEntity2 = userController.createRecord(2, record);
+
+        assertThat(responseEntity1.getStatusCodeValue(), equalTo(201));
+        assertThat(requireNonNull(responseEntity1.getHeaders().getLocation()).getPath(), equalTo("/api/records/2"));
+
+        assertThat(responseEntity2.getStatusCodeValue(), equalTo(400));
+
     }
 }
