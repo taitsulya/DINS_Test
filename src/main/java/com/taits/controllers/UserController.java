@@ -19,11 +19,11 @@ import java.util.Optional;
 @RequestMapping("/api/users")
 public class UserController {
 
-        @Autowired
-        private UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-        @Autowired
-        private RecordRepository recordRepository;
+    @Autowired
+    private RecordRepository recordRepository;
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<User> getAllUsers(String firstName, String lastName) {

@@ -17,7 +17,7 @@ create table record
     last_name    varchar(50),
     phone_number varchar(20),
     owner        integer not null
-            references users
+            references users on delete cascade on update cascade
 );
 
 create unique index record_id_uindex
